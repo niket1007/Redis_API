@@ -8,13 +8,11 @@ from Models.models import DataTypeEnum, SETRequestModel
 def init_connection() -> Generator[Redis]:
     redis = None
     try:
-        username = config("redis_username", cast=str)
-        password = config("redis_password", cast=str)
         redis = Redis(
             host=config("redis_host", cast=str),
             port=config("redis_port", cast=int),
-            username=username if username else None,
-            password=password if password else None,
+            username=config("redis_username", cast=str, default=None),
+            password=config("redis_password", cast=str, default=None),
             decode_responses=True
         )
         yield redis
@@ -44,7 +42,7 @@ def set_str_data(
         conn: Redis, 
         key: str, value: str, expiryTime: Optional[int] = None) -> None:
     if expiryTime is not None:
-        conn.set(name=key, value=value, ex=expiryTime)
+        return conn.set(name=key, value=value, ex=expiryTime)
     conn.set(name=key, value=value)
 
 def get_list_data(conn: Redis, key: str) -> Optional[list[Any]]:
